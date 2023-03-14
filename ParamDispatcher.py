@@ -11,19 +11,20 @@ class SingleParamDispatcher():
     #TODO: response from GNU script on actual variable change
 
     def __init__(self, PUB_addr="tcp://192.168.0.84:52010",
-                 init_delay= 1):
+                 init_delay= 1, verbose = True):
         '''
         INPUTS:
         -- PUB_addr: address to send (variable, value) message to (new value of a variable to set)
         '''
-        self.PUB_addr= PUB_addr
+        self.verbose = verbose
+        self.PUB_addr = PUB_addr
 
         context = zmq.Context()
         self.socket_PUB = context.socket(zmq.PUB)
         bind_result = self.socket_PUB.bind(PUB_addr)
         sleep(init_delay)
 
-    def setVariable(self, Variable, Value):
+    def setVariable(self, Variable, Value, verbose):
         '''
         -- Variable: str, name of variable to set
         -- Value: float, numerical value
@@ -34,6 +35,7 @@ class SingleParamDispatcher():
         tuple_pmt= pmt.cons(Variable_pmt, Value_pmt)
         serlzd_tuple_pmt= pmt.serialize_str(tuple_pmt)
         self.socket_PUB.send(serlzd_tuple_pmt)
+        if self.verbose: print('Param {} was set to {}'.format(Variable, Value))
 
 class MultipleParamDispatcher():
     '''
@@ -41,21 +43,22 @@ class MultipleParamDispatcher():
     Distributes the task of setting a parameter to specific SingleParamDispatcher, responsible for the param.
     On the GNUradio project side there must be a socket accepting the message for the parameter.
     '''
-    def __init__(self, Param2AddrMap):
+    def __init__(self, Param2AddrMap, verbose = True):
         '''
         INPUTS:
         -- Param2AddrMap: dict, pairs of ( str param_name, str address )
         '''
-
+        self.verbose = verbose
         self.Param2DispatcherMap = dict({}) #dict setting a dispatcher for each parameter
         for param, addr in Param2AddrMap.items():
-            self.Param2DispatcherMap[param]= SingleParamDispatcher(PUB_addr= addr)
+            self.Param2DispatcherMap[param]= SingleParamDispatcher(PUB_addr = addr, verbose = verbose)
+
 
     def setParam(self, Param, Value):
         dispatcher= self.Param2DispatcherMap[Param]
-        dispatcher.setVariable(Param, Value)
+        dispatcher.setVariable(Param, Value, self.verbose)
 
-
+#TODO: change setParam to accept a list o tuples at once
 
 
 if __name__ == '__main__':

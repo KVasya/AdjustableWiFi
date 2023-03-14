@@ -21,10 +21,12 @@ class MessageEcho():
     through ZeroMQ PUB/SUB sockets.
     """
 
-    def __init__(self, SUB_addr= "tcp://*:52004",
-                       PUB_addr= "tcp://192.168.0.84:52001",
+    def __init__(self, N_msgs = 1000,
+                       SUB_addr = "tcp://127.0.0.1:52003",
+                       PUB_addr = "tcp://127.0.0.1:52002",
                        send_delay= .1,
-                       init_delay= 1
+                       init_delay= 1,
+                       verbose = True
 
                  ):
         '''
@@ -35,11 +37,12 @@ class MessageEcho():
             init_delay -- pause for SUB socket to initialize before sending
         '''
 
-        self.SUB_addr= SUB_addr
-        self.PUB_addr= PUB_addr
-        self.send_delay= send_delay
-        self.init_delay= init_delay
-
+        self.SUB_addr = SUB_addr
+        self.PUB_addr = PUB_addr
+        self.send_delay = send_delay
+        self.init_delay = init_delay
+        self.N_msgs = N_msgs
+        self.verbose = verbose
 
 
     def sendMsgs(self, N_messages):
@@ -72,16 +75,17 @@ class MessageEcho():
             msg_echoed = socket_SUB.recv()
             msg_echoed = pmt.to_python(pmt.deserialize_str(msg_echoed))
 
-            print('Received message:{}'.format(msg_echoed))
+            if self.verbose: print('Received message:{}'.format(msg_echoed))
             queue.put(msg_echoed)
 
 
-    def evaluateChnl(self, N_msgs):
+    def evaluateChnl(self):
         '''
         sends N_msgs over the channel
         returns quantity of messages received
         '''
 
+        N_msgs= self.N_msgs
         Q_recv= Queue()
         sendProcess= Process(target= self.sendMsgs, args= (N_msgs,))
         recvProcess= Process(target= self.recvMsgs, args=(Q_recv,) )
@@ -101,6 +105,6 @@ if __name__ == '__main__':
 
 
     N_sent= 10
-    MessageEcho_ = MessageEcho()
-    N_rcvd= MessageEcho_.evaluateChnl(N_sent)
-    print('{} messages were received out of {} sent'.format(N_rcvd, N_sent))
+    MessageEcho_ = MessageEcho(N_msgs = N_sent)
+    N_rcvd= MessageEcho_.evaluateChnl()
+    if self.verbose: print('{} messages were received out of {} sent'.format(N_rcvd, N_sent))
