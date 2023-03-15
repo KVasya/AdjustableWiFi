@@ -17,6 +17,7 @@ The second part is external Python script which sequentially  optimizes GNU radi
 Here the 'gp_minimize' function from the 'scikit-optimize' package is employed.
 
 PREREQUISITES
+
 Prerequisites are mainly due to GNU Radio project.
 The installation instructions from the base project https://github.com/bastibl/gr-ieee802-11 should be followed. 
 The 'gr-ieee802-11' project implies USRP hardware, which was changed by me to UHD (two HackRF devices). Thus also you may need to install UHD.
