@@ -23,7 +23,11 @@ The installation instructions from the base project https://github.com/bastibl/g
 The 'gr-ieee802-11' project implies USRP hardware, which was changed by me to UHD (two HackRF devices). Thus also you may need to install UHD.
 Optimization part needs Python 3 with 'scikit-optimize' installed.
 
-The code operates in two independent scripts communicating through zmq interface.
+The code operates in two independent scripts communicating through zmq interface. It was tested on an i5 core machine. It's important for the operation of gr-ieee802-11 that real-time scheduling is
+ enabled (it's a project option, it's on by default, but for weaker configurations it might lead to errors). The default 20MHz bandwidth of  gr-ieee802-11
+leads to receiver overflow, so it's switched to 5MHz by 'main.py' at it's start.
+
 To launch the project:
+0. In 'wifi_transceiver_patched.grc' change serial numbers for UHD devices to those of your devices.
 1. Start 'wifi_transceiver_patched.grc' in GNU radio. It requires two Hackrf (UHD) devices attached to the host PC (or it might be reconfigured to single USRP-device supporting simultaneous reception and transmission).  
 2. Execute 'main.py'.  

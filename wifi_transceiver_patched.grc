@@ -16,7 +16,7 @@ options:
     output_language: python
     placement: (0,0)
     qt_qss_theme: ''
-    realtime_scheduling: ''
+    realtime_scheduling: '1'
     run: 'True'
     run_command: '{python} -u {filename}'
     run_options: prompt
@@ -386,7 +386,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [576, 1080.0]
+    coordinate: [680, 1096.0]
     rotation: 0
     state: enabled
 - name: blocks_message_strobe_0

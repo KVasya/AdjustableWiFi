@@ -29,13 +29,13 @@ class MessageEcho():
                        verbose = True
 
                  ):
-        '''
+        """
         ARGUMENTS:
             SUB_addr -- ZMQ socket address from which to receive messages
             PUB_addr -- ZMQ socket address  to send messages to
             delay -- pause between messages sent
             init_delay -- pause for SUB socket to initialize before sending
-        '''
+        """
 
         self.SUB_addr = SUB_addr
         self.PUB_addr = PUB_addr
@@ -44,7 +44,6 @@ class MessageEcho():
         self.N_msgs = N_msgs
         self.verbose = verbose
 
-
     def sendMsgs(self, N_messages):
 
         context = zmq.Context()
@@ -52,8 +51,7 @@ class MessageEcho():
         bind_result = socket_PUB.bind(self.PUB_addr)
         sleep(self.init_delay)
 
-
-        test_msg= 'TEST'
+        test_msg = 'TEST'
         for i in range(N_messages):
             i += 1
             sleep(self.send_delay)
@@ -88,7 +86,7 @@ class MessageEcho():
         N_msgs= self.N_msgs
         Q_recv= Queue()
         sendProcess= Process(target= self.sendMsgs, args= (N_msgs,))
-        recvProcess= Process(target= self.recvMsgs, args=(Q_recv,) )
+        recvProcess= Process(target= self.recvMsgs, args=(Q_recv,))
 
         sendProcess.start()
         recvProcess.start()
