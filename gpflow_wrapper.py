@@ -3,6 +3,7 @@ from collections import OrderedDict
 import gpflow
 from sklearn import preprocessing
 import numpy as np
+import logging
 
 """ 
 This wrapper of gpflow defines a class to fit experimental
@@ -44,15 +45,32 @@ class GPMaximizer():
         self.model = None
         self.N_search = N_search
 
-    def generate_init_points(self):
-        """ generate initial points to evaluate optimized function at
-            fits scaler to initial points
+    def generate_random_point(self):
+        """ generate random points within param bounds
          """
-        init_points = generate_random_points(self.N_init_points, self.param_bounds)
-        self.scaler.fit(init_points)
-        self.init_points = self.scaler.transform(init_points)
+        N_points = 1
+        random_point = generate_random_points(N_points, self.param_bounds)[0]
 
-        return init_points
+        return random_point
+
+
+    def init_scaler(self, X):
+        self.scaler.fit(X)
+
+    def model_params(self, format= 'dict'):
+        """ Returns dict with model params
+            Inputs:
+                -- format: 'dict': dict, 'array': np.array
+        """
+
+        names = ['kernel.length', 'kernel.variance', 'noise.variance']
+        params = [p.numpy() for p in self.model.parameters]
+        if format == 'dict':
+            return dict(zip(names,params))
+        if format == 'array':
+            return np.vstack(params)
+
+
 
     def learn_gp_model(self, X, Y, N_restarts=100, verbose=True):
         """ Several model examples are learned, the best one is taken"""
@@ -75,8 +93,7 @@ class GPMaximizer():
         models = sorted(models, key=lambda x: x[1])
 
         model_qlty = models[-1][1]
-        if verbose:
-            print('The best model quality: {}'.format(model_qlty))
+
 
         # best model chosen
         self.model = models[-1][0]
@@ -88,7 +105,7 @@ class GPMaximizer():
         X_candidate = generate_random_points(self.N_search, self.param_bounds)
         X_candidate = self.scaler.transform(X_candidate)
         mean, var = self.model.predict_f(X_candidate)
-        X_new = np.array([X_candidate[np.argmax((mean - kappa * var))]])
+        X_new = np.array([X_candidate[np.argmax((mean + kappa * var))]])
         __X_new = self.scaler.inverse_transform(X_new)  # X_new transformed to original space to put into function
 
         return __X_new
