@@ -10,14 +10,14 @@ import pickle
 
 
 # KEY PARAMS
-N_msgs = 10000  # quantity of messages send per each channel rate testing
-N_init_points = 5  # quantity of initial points required to build a model
+N_msgs = 1000  # quantity of messages send per each channel rate testing
+N_init_points = 5  # quantity of initial points with non-zero channel rate required to build a model
 # TODO: criterion to choose N_init_points (perhaps, we better need to reach some model quality)
 # TODO: add early detection of zero-rate points, less than N_msgs should be spent on them
 
 N_sequential = 20  # quantity of sequential search trials
 N_search = 10000  # quantity of search points per trial (quantity of (mean, var) estimates)
-gauss_thr = 2  # controls filtering of channel_rates close to zero
+gauss_thr = 0  # controls filtering of channel_rates close to zero
 kappa = -1  # determines how new points are chosen -- either mean or variance is preferred
             # point with largest (mean + kappa*var) is chosen
 
@@ -109,16 +109,21 @@ if rate == 0:
 
 # CHANNEL RATE MEASUREMENT AT INITIAL RANDOM POINTS
 print('\nCHANNEL RATE MEASUREMENT AT INITIAL RANDOM POINTS')
-print('\t{} init points to be acquired by random search\n'.format(N_init_points))
+print('\t{} init points (channel_rate>0) to be acquired by random search\n'.format(N_init_points))
 X, Y = [],[]
+
 trial_cnt = 0
-while len(X) < N_init_points:
+positive_cnt = 0  # counts points with positive channel_rate
+
+while positive_cnt < N_init_points:
     x = GPMaximizer_.generate_random_point()
     y = channelRate(x)
     if is_gaussian(N_msgs, y, gauss_thr):
         X.append(x)
         Y.append([y])
         print('\t {}. point {} with rate={} accepted'.format(trial_cnt,x,y))
+        if y > 0:
+            positive_cnt += 1
     else:
         print('\t {}. point {} with rate={} was rejected as being too noisy'.format(trial_cnt,  x,y))
     trial_cnt+=1
@@ -147,11 +152,13 @@ Xs = []
 model_qlts = []
 model_params = []
 
+trial_cnt = 0
 for j in range(N_sequential):
     X_new = GPMaximizer_.find_next_point(kappa=kappa)
     Y_new = channelRate(X_new[0])
     if is_gaussian(N_msgs, Y_new, gauss_thr):
 
+        trial_cnt += 1
         X = np.vstack([X, X_new])
         Y = np.vstack([Y, [Y_new]])
         model_log_prob = GPMaximizer_.learn_gp_model(X, Y)
@@ -159,7 +166,7 @@ for j in range(N_sequential):
         model_params.append(model_param)
 
 
-        print('\t Point {} with rate={} accepted for model update. Current model log_prob={}'.format(X_new, Y_new,
+        print('\t{}. Point {} with rate={} accepted for model update. Current model log_prob={}'.format(trial_cnt, X_new, Y_new,
                                                                                                    model_log_prob))
         Ys.append(Y_new)
         Xs.append(X_new)
