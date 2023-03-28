@@ -31,6 +31,43 @@ def generate_random_points(N_points, param_bounds):
     return np.array(points)
 # TODO: put this function into utilities
 
+#TODO: put this class into 'utilities' module
+
+class BoundsScaler():
+    """ Scaler based on strict bounds for variables, it scales each bound to [-1,1]
+    If variable is single-valued it's scaled to 0."""
+    def __init__(self, param_bounds):
+        self.param_bounds = param_bounds
+
+    def fit(self, X):  # just for compatibility with 'sklearn.preprocessing.StandardScaler'
+        pass
+
+    def transform(self, X):
+
+        X = X.copy()
+        for j, bnds in enumerate(self.param_bounds):
+
+            if len(bnds) == 1:
+                X[:, j] = 0
+
+            if len(bnds) == 2:
+                L_bnds = bnds[1] - bnds[0]
+                X[:, j] = 2 * (X[:, j] - bnds[0]) / L_bnds - 1
+
+        return X
+
+    def inverse_transform(self, X):
+        X = X.copy()
+        for j, bnds in enumerate(self.param_bounds):
+
+            if len(bnds) == 1:
+                X[:, j] = bnds[0]
+
+            if len(bnds) == 2:
+                L_bnds = bnds[1] - bnds[0]
+                X[:, j] = bnds[0] + L_bnds * (1 + X[:, j]) / 2
+
+        return X
 
 
 class GPMaximizer():
@@ -38,12 +75,20 @@ class GPMaximizer():
         Object for sequential optimization.
         It holds GP model, updates it, generates new points.
     """
-    def __init__(self, param_bounds, N_init_points, N_search):
+    def __init__(self, param_bounds, N_init_points, N_search, scaler_type='bounds', y_normalize=True):
+        """ inputs:
+                --scaler_type, str: 'bounds', 'sklearn'
+        """
         self.param_bounds = param_bounds
         self.N_init_points = N_init_points
-        self.scaler = preprocessing.StandardScaler()
+        if scaler_type=='bounds':
+            self.scaler = BoundsScaler(param_bounds)
+        if scaler_type=='sklearn':
+            self.scaler = preprocessing.StandardScaler()
         self.model = None
         self.N_search = N_search
+        self.scaler_type = scaler_type
+        self.y_normalize = y_normalize
 
     def generate_random_point(self):
         """ generate random points within param bounds
@@ -76,17 +121,19 @@ class GPMaximizer():
         """ Several model examples are learned, the best one is taken"""
 
         X__ = self.scaler.transform(X)
+        if self.y_normalize:
+            Y__ = Y - np.mean(Y, axis=0)
 
         models = []
         opt = gpflow.optimizers.Scipy()
 
         for j in range(N_restarts):
-            model = gpflow.models.GPR((X__, Y),
+            model = gpflow.models.GPR((X__, Y__),
                                       kernel=gpflow.kernels.SquaredExponential()
                                       )
 
             opt.minimize(model.training_loss, model.trainable_variables)
-            log_probs = model.predict_log_density((X__, Y))
+            log_probs = model.predict_log_density((X__, Y__))
             mean_log_prob = np.mean(log_probs)
             models += [(model, mean_log_prob)]
 
