@@ -52,7 +52,8 @@ The channel was  implemented on a software defined radio (SDR) platform. WiFi lo
 
 My experiments were based on GNU radio (GR, https://www.gnuradio.org/) implementation of IEEE 802.11 protocol (aka WiFi, https://github.com/bastibl/gr-ieee802-11 by Bastibl). GR enables you to configure a relatively cheap  radio device for WiFi signals. The gr-ieee802-11 implementation in principle reveals all the internal stages of WiFi signal treatment. If we wanted to optimize it, a decent way would be to go deep into the project and see what's going on with the signal. A different way is to consider WiFi implementation as a black box and optimize it's performance by trying many different project parameter values. This way one actually works with a project facing it for the first time.   My intention was to find a mathematical framework for such a triage of complicated GR projects. If useful, such a functionality could be  wrapped in a standard GR block. 
 
-I took 2 HackRF  devices (one for transmissions and one for reception, Fig. 0) and changed gr-ieee802-11 into echo configuration: a short text message is encoded into physical signal, sent through transmitting device, then it's caught by receiving device, and then decoded back into text (GNU radio project is shown in Fig. 1). The devices operated in 2.4GHz WiFi frequency range.
+I took 2 HackRF  devices (one for transmissions and one for reception, Fig. 0) and changed gr-ieee802-11 into echo configuration: a short text message is encoded into physical signal, sent through transmitting device, then it's caught by receiving device, and then decoded back into text (GNU radio project is shown in Fig. 1). The devices operated in 2.4GHz WiFi frequency range.   
+
 
 ![Figure 0. Experimental setup. Two HackRF (https://greatscottgadgets.com/hackrf/) devices connected to host notebook PC.](https://github.com/KVasya/AdjustableWiFi/blob/gpflow/Experimental_setup.png)
 
