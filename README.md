@@ -54,7 +54,7 @@ My experiments were based on GNU radio (GR, https://www.gnuradio.org/) implement
 
 I took 2 HackRF  devices (one for transmissions and one for reception, Fig. 0) and changed gr-ieee802-11 into echo configuration: a short text message is encoded into physical signal, sent through transmitting device, then it's caught by receiving device, and then decoded back into text (GNU radio project is shown in Fig. 1). The devices operated in 2.4GHz WiFi frequency range.
 
-![Figure 0. Experimental setup. Two HackRF (https://greatscottgadgets.com/hackrf/) devices connected to host notebook PC]()
+![Figure 0. Experimental setup. Two HackRF (https://greatscottgadgets.com/hackrf/) devices connected to host notebook PC]('./GNURadio.png')
 
 Figure 1. GNU radio project gr-ieee802-11 changed to echo configuration.  
 
