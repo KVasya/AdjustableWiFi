@@ -26,7 +26,7 @@ PREREQUISITES
 Prerequisites are mainly due to GNU Radio project.
 The installation instructions from the base project https://github.com/bastibl/gr-ieee802-11 should be followed. 
 The 'gr-ieee802-11' project implies USRP hardware, which was changed by me to UHD (two HackRF devices). Thus also you may need to install UHD.
-Optimization part needs Python 3 with 'scikit-optimize' installed.
+Optimization part needs Python 3 with 'gpflow' installed.
 
 The code operates in two independent scripts communicating through zmq interface.
 To launch the project:
