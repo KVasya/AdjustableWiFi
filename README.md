@@ -34,7 +34,7 @@ To launch the project:
 2. Execute 'main.py'.  
 
 
-
+Results analysis in text below could be reproduced with scripts from 'ipynb' folder.
 
 
 
